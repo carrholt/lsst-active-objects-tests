@@ -39,6 +39,7 @@ def make_model_comet(
     sigma=seeing_to_sigma_pixels(0.75),
     coma_type="symmetric",
     sky_mag=LSST_R_SKY_MAG,
+    seed=None,
     **coma_kwargs,
 ):
     """
@@ -50,6 +51,8 @@ def make_model_comet(
 
     sky_mag is the sky surface brightness (mag/arcsec^2, AB) used to set
     the per-pixel background noise; pass None to skip noise entirely.
+
+    seed controls the sky noise draw, for reproducible trials.
 
     Returns
     -------
@@ -66,7 +69,8 @@ def make_model_comet(
 
     if sky_mag is not None:
         noise_sigma = np.sqrt(sky_flux_per_pixel(sky_mag))
-        image += np.random.normal(0, noise_sigma, shape)
+        rng = np.random.default_rng(seed)
+        image = image + rng.normal(0, noise_sigma, shape)
 
     return image
 
