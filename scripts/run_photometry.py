@@ -5,18 +5,19 @@ of results to a CSV log.
 import csv
 from pathlib import Path
 
-from lsst_aot.experiments import FIELDNAMES, run_trial
+from lsst_aot.experiments import fieldnames_for, run_trial
 
 OUTPUT_FILE = Path(__file__).resolve().parent.parent / "output" / "photometry_results.csv"
+APERTURE_RADII_ARCSEC = [2.4]
 
 
 def main():
-    row = run_trial(mag=20.0, nucleus_fraction=0.05, aperture_radius_arcsec=2.4)
+    row = run_trial(mag=20.0, nucleus_fraction=0.05, aperture_radii_arcsec=APERTURE_RADII_ARCSEC)
 
     OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     write_header = not OUTPUT_FILE.exists()
     with open(OUTPUT_FILE, "a", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+        writer = csv.DictWriter(f, fieldnames=fieldnames_for(APERTURE_RADII_ARCSEC))
         if write_header:
             writer.writeheader()
         writer.writerow(row)
