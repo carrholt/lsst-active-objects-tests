@@ -1,8 +1,25 @@
-venv/
-__pycache__/
-*.pyc
+# IDEs
+.vscode/
+.idea/
 .ipynb_checkpoints/
-.DS_Store
-*.egg-info/
-.env
+
+# Intermediate Coverage file
+.coverage
+
+# Data files
 data/
+
+# Output files
+*.png
+
+# Python runtime
+*.pyc
+*.egg-info
+.pytest_cache
+__pycache__/
+
+# Virtual environments
+venv/
+.venv/
+
+.DS_Store
