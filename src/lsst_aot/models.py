@@ -4,18 +4,12 @@ Model comet generation: PSF nucleus + coma image models.
 import numpy as np
 from astropy.io import fits
 
-from .utils import LSST_R_SKY_MAG, ab_mag_to_njy, seeing_to_sigma_pixels, sky_flux_per_pixel
-
-
-def _rho_grid(shape, center):
-    """Per-pixel distance from center."""
-    y, x = np.indices(shape)
-    return np.sqrt((x - center[1]) ** 2 + (y - center[0]) ** 2)
+from .utils import LSST_R_SKY_MAG, ab_mag_to_njy, rho_grid, seeing_to_sigma_pixels, sky_flux_per_pixel
 
 
 def make_nucleus_psf(shape, center, flux, sigma):
     """Generate a Gaussian PSF representing the bare nucleus, normalized to `flux`."""
-    rho = _rho_grid(shape, center)
+    rho = rho_grid(shape, center)
     psf = np.exp(-rho ** 2 / (2 * sigma ** 2))
     return flux * psf / psf.sum()
 
@@ -32,7 +26,7 @@ def make_coma_profile(shape, center, flux, coma_type="symmetric", rho_min=1.0, *
     if coma_type != "symmetric":
         raise NotImplementedError(f"coma_type={coma_type!r} not implemented yet")
 
-    rho = _rho_grid(shape, center)
+    rho = rho_grid(shape, center)
     rho = np.clip(rho, rho_min, None)  # avoid 1/rho singularity at the nucleus
     coma = 1.0 / rho
     return flux * coma / coma.sum()

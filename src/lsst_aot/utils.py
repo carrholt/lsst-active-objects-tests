@@ -6,6 +6,12 @@ import numpy as np
 LSST_PIXEL_SCALE = 0.2  # arcsec / pixel
 
 
+def rho_grid(shape, center):
+    """Per-pixel distance from center."""
+    y, x = np.indices(shape)
+    return np.sqrt((x - center[1]) ** 2 + (y - center[0]) ** 2)
+
+
 def fwhm_to_sigma(fwhm):
     """Convert a Gaussian FWHM to sigma (same units in and out)."""
     return fwhm / (2 * np.sqrt(2 * np.log(2)))
