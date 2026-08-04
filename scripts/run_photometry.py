@@ -14,7 +14,7 @@ from lsst_aot.photometry import (
 )
 from lsst_aot.utils import ab_mag_to_njy, njy_to_ab_mag
 
-OUTPUT_FILE = Path(__file__).resolve().parent.parent / "data" / "photometry_results.csv"
+OUTPUT_FILE = Path(__file__).resolve().parent.parent / "output" / "photometry_results.csv"
 
 FIELDNAMES = [
     "mag",
