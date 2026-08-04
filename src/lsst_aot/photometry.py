@@ -21,3 +21,8 @@ def aperture_photometry(image, center, radius_arcsec=2.4, pixel_scale=LSST_PIXEL
     radius_px = radius_arcsec / pixel_scale
     rho = rho_grid(image.shape, center)
     return image[rho <= radius_px].sum()
+
+
+def aperture_flux_fraction(image, center, total_flux, radius_arcsec=2.4, pixel_scale=LSST_PIXEL_SCALE):
+    """Fraction of total_flux captured within the aperture."""
+    return aperture_photometry(image, center, radius_arcsec, pixel_scale) / total_flux
