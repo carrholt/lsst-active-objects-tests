@@ -16,6 +16,11 @@ def psf_photometry(image, center, sigma=seeing_to_sigma_pixels(0.75)):
     return np.sum(image * template) / np.sum(template ** 2)
 
 
+def psf_flux_fraction(image, center, total_flux, sigma=seeing_to_sigma_pixels(0.75)):
+    """Fraction of total_flux recovered by PSF photometry."""
+    return psf_photometry(image, center, sigma) / total_flux
+
+
 def aperture_photometry(image, center, radius_arcsec=2.4, pixel_scale=LSST_PIXEL_SCALE):
     """Sum flux within a circular aperture of the given radius (arcsec)."""
     radius_px = radius_arcsec / pixel_scale

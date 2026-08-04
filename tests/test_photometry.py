@@ -2,7 +2,12 @@ import numpy as np
 import pytest
 
 from lsst_aot.models import make_model_comet, make_nucleus_psf
-from lsst_aot.photometry import aperture_flux_fraction, aperture_photometry, psf_photometry
+from lsst_aot.photometry import (
+    aperture_flux_fraction,
+    aperture_photometry,
+    psf_flux_fraction,
+    psf_photometry,
+)
 from lsst_aot.utils import ab_mag_to_njy, seeing_to_sigma_pixels
 
 
@@ -19,6 +24,22 @@ def test_psf_photometry_underestimates_extended_source():
     total_flux = ab_mag_to_njy(20.0)
     flux = psf_photometry(image, (50, 50))
     assert 0 < flux < total_flux
+
+
+def test_psf_flux_fraction_matches_ratio():
+    image = make_model_comet(mag=20.0, sky_mag=None)
+    center = (50, 50)
+    total_flux = ab_mag_to_njy(20.0)
+    fraction = psf_flux_fraction(image, center, total_flux)
+    expected = psf_photometry(image, center) / total_flux
+    assert fraction == pytest.approx(expected)
+
+
+def test_psf_flux_fraction_between_zero_and_one():
+    image = make_model_comet(mag=20.0, sky_mag=None)
+    total_flux = ab_mag_to_njy(20.0)
+    fraction = psf_flux_fraction(image, (50, 50), total_flux)
+    assert 0 < fraction < 1
 
 
 def test_aperture_photometry_counts_pixels_in_radius():
