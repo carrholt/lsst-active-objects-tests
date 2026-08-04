@@ -27,9 +27,9 @@ FIELDNAMES = [
 ]
 
 
-def run_trial(mag, nucleus_fraction=0.05, aperture_radius_arcsec=2.4, seed=None):
+def run_trial(mag, nucleus_fraction=0.05, aperture_radius_arcsec=2.4, shape=(101, 101), seed=None):
     """Build one model comet and measure it; returns a result row dict."""
-    image = make_model_comet(mag=mag, nucleus_fraction=nucleus_fraction, seed=seed)
+    image = make_model_comet(shape=shape, mag=mag, nucleus_fraction=nucleus_fraction, seed=seed)
     center = (image.shape[0] // 2, image.shape[1] // 2)
     total_flux = ab_mag_to_njy(mag)
 
