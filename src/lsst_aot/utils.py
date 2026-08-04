@@ -27,6 +27,11 @@ def ab_mag_to_njy(mag):
     return 3631e9 * 10 ** (-mag / 2.5)
 
 
+def njy_to_ab_mag(flux_njy):
+    """Convert a flux density in nanojansky to an AB apparent magnitude."""
+    return -2.5 * np.log10(flux_njy / 3631e9)
+
+
 LSST_R_SKY_MAG = 21.2  # dark-sky surface brightness, r-band, mag/arcsec^2
 
 # TODO: sky_mag above is treated as fixed, but real sky brightness fluctuates
