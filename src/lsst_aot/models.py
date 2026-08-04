@@ -4,7 +4,7 @@ Model comet generation: PSF nucleus + coma image models.
 import numpy as np
 from astropy.io import fits
 
-from .utils import seeing_to_sigma_pixels
+from .utils import LSST_R_SKY_MAG, ab_mag_to_njy, seeing_to_sigma_pixels, sky_flux_per_pixel
 
 
 def _rho_grid(shape, center):
@@ -40,27 +40,39 @@ def make_coma_profile(shape, center, flux, coma_type="symmetric", rho_min=1.0, *
 
 def make_model_comet(
     shape=(101, 101),
-    nucleus_flux=1000.0,
-    coma_flux=500.0,
+    mag=20.0,
+    nucleus_fraction=0.05,
     sigma=seeing_to_sigma_pixels(0.75),
     coma_type="symmetric",
-    noise_level=None,
+    sky_mag=LSST_R_SKY_MAG,
     **coma_kwargs,
 ):
     """
-    Build a full model comet image: nucleus PSF + coma, optional noise.
+    Build a full model comet image: nucleus PSF + coma, optional sky noise.
+
+    mag is the apparent AB magnitude of the comet, converted to a total
+    flux in nJy. nucleus_fraction sets what fraction of that flux goes
+    into the unresolved nucleus PSF; the rest goes into the coma.
+
+    sky_mag is the sky surface brightness (mag/arcsec^2, AB) used to set
+    the per-pixel background noise; pass None to skip noise entirely.
 
     Returns
     -------
     numpy.ndarray
     """
+    total_flux = ab_mag_to_njy(mag)
+    nucleus_flux = nucleus_fraction * total_flux
+    coma_flux = total_flux - nucleus_flux
+
     center = (shape[0] // 2, shape[1] // 2)
     nucleus = make_nucleus_psf(shape, center, nucleus_flux, sigma)
     coma = make_coma_profile(shape, center, coma_flux, coma_type=coma_type, **coma_kwargs)
     image = nucleus + coma
 
-    if noise_level is not None:
-        image += np.random.normal(0, noise_level, shape)
+    if sky_mag is not None:
+        noise_sigma = np.sqrt(sky_flux_per_pixel(sky_mag))
+        image += np.random.normal(0, noise_sigma, shape)
 
     return image
 
