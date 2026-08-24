@@ -1,7 +1,6 @@
 # rubin-active-object-tests
 
-Tests and exploratory scripts related to LSST/Rubin alerts and active
-small bodies (comets, active asteroids), including long-period comets.
+Tests and exploratory scripts related to LSST/Rubin alerts and active small bodies.
 
 ## Setup
 
