@@ -4,21 +4,21 @@ Photometry functions for measuring flux from model comet images.
 import numpy as np
 
 from .models import make_nucleus_psf
-from .utils import LSST_PIXEL_SCALE, rho_grid, seeing_to_sigma_pixels
+from .utils import LSST_PIXEL_SCALE, rho_grid, seeing_to_moffat_alpha_pixels
 
 
-def psf_photometry(image, center, sigma=seeing_to_sigma_pixels(0.75)):
+def psf_photometry(image, center, alpha=seeing_to_moffat_alpha_pixels(0.75)):
     """
-    Estimate flux by fitting a point source with the given PSF sigma (the
-    same PSF as field stars) via a weighted least-squares fit.
+    Estimate flux by fitting a point source with the given Moffat PSF alpha
+    (the same PSF as field stars) via a weighted least-squares fit.
     """
-    template = make_nucleus_psf(image.shape, center, flux=1.0, sigma=sigma)
+    template = make_nucleus_psf(image.shape, center, flux=1.0, alpha=alpha)
     return np.sum(image * template) / np.sum(template ** 2)
 
 
-def psf_flux_fraction(image, center, total_flux, sigma=seeing_to_sigma_pixels(0.75)):
+def psf_flux_fraction(image, center, total_flux, alpha=seeing_to_moffat_alpha_pixels(0.75)):
     """Fraction of total_flux recovered by PSF photometry."""
-    return psf_photometry(image, center, sigma) / total_flux
+    return psf_photometry(image, center, alpha) / total_flux
 
 
 def aperture_photometry(image, center, radius_arcsec=2.4, pixel_scale=LSST_PIXEL_SCALE):

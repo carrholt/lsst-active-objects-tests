@@ -12,14 +12,14 @@ from .photometry import (
     psf_flux_fraction,
     psf_photometry,
 )
-from .utils import LSST_R_SKY_MAG, ab_mag_to_njy, njy_to_ab_mag, seeing_to_sigma_pixels, sky_flux_per_pixel
+from .utils import LSST_R_SKY_MAG, ab_mag_to_njy, njy_to_ab_mag, seeing_to_moffat_alpha_pixels, sky_flux_per_pixel
 
 BASE_FIELDNAMES = [
     "mag",
     "nucleus_fraction",
     "shape_y",
     "shape_x",
-    "sigma_px",
+    "alpha_px",
     "sky_mag",
     "total_flux_njy",
     "total_mag",
@@ -30,7 +30,7 @@ BASE_FIELDNAMES = [
     "seed",
 ]
 
-DILATION_FACTOR = 2.4  # dilation radius = DILATION_FACTOR * psf sigma
+DILATION_FACTOR = 2.4  # dilation radius = DILATION_FACTOR * psf alpha
 
 
 def _radius_tag(radius_arcsec):
@@ -57,7 +57,7 @@ def run_trial(
     nucleus_fraction=0.05,
     aperture_radii_arcsec=(2.4,),
     shape=(101, 101),
-    sigma=seeing_to_sigma_pixels(0.75),
+    alpha=seeing_to_moffat_alpha_pixels(0.75),
     sky_mag=LSST_R_SKY_MAG,
     seed=None,
 ):
@@ -70,31 +70,34 @@ def run_trial(
         shape=shape,
         mag=mag,
         nucleus_fraction=nucleus_fraction,
-        sigma=sigma,
+        alpha=alpha,
         sky_mag=sky_mag,
         seed=seed,
     )
     center = (image.shape[0] // 2, image.shape[1] // 2)
     total_flux = ab_mag_to_njy(mag)
 
-    psf_flux = psf_photometry(image, center)
+    psf_flux = psf_photometry(image, center, alpha=alpha)
 
-    noise_sigma = np.sqrt(sky_flux_per_pixel(sky_mag))
-    dilation_radius = DILATION_FACTOR * sigma
-    bbox_size = compute_bbox_size(image, noise_sigma, dilation_radius)
+    # bboxSize reflects detectability against the real sky noise level even
+    # for a noiseless realization, so fall back to LSST_R_SKY_MAG rather than
+    # feeding sky_mag=None into the threshold calculation.
+    noise_sigma = np.sqrt(sky_flux_per_pixel(sky_mag if sky_mag is not None else LSST_R_SKY_MAG))
+    dilation_radius = DILATION_FACTOR * alpha
+    bbox_size = compute_bbox_size(image, center, noise_sigma, dilation_radius)
 
     row = {
         "mag": mag,
         "nucleus_fraction": nucleus_fraction,
         "shape_y": shape[0],
         "shape_x": shape[1],
-        "sigma_px": sigma,
+        "alpha_px": alpha,
         "sky_mag": sky_mag,
         "total_flux_njy": total_flux,
         "total_mag": mag,
         "psf_flux_njy": psf_flux,
         "psf_mag": njy_to_ab_mag(psf_flux),
-        "psf_fraction": psf_flux_fraction(image, center, total_flux),
+        "psf_fraction": psf_flux_fraction(image, center, total_flux, alpha=alpha),
         "bboxSize": bbox_size,
         "seed": seed,
     }

@@ -12,12 +12,12 @@ from lsst_aot.utils import ab_mag_to_njy
 
 
 def test_make_nucleus_psf_conserves_flux():
-    psf = make_nucleus_psf((51, 51), (25, 25), flux=100.0, sigma=2.0)
+    psf = make_nucleus_psf((51, 51), (25, 25), flux=100.0, alpha=2.0)
     assert psf.sum() == pytest.approx(100.0)
 
 
 def test_make_nucleus_psf_peaks_at_center():
-    psf = make_nucleus_psf((51, 51), (25, 25), flux=100.0, sigma=2.0)
+    psf = make_nucleus_psf((51, 51), (25, 25), flux=100.0, alpha=2.0)
     assert np.unravel_index(np.argmax(psf), psf.shape) == (25, 25)
     assert np.all(psf >= 0)
 

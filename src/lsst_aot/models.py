@@ -4,13 +4,20 @@ Model comet generation: PSF nucleus + coma image models.
 import numpy as np
 from astropy.io import fits
 
-from .utils import LSST_R_SKY_MAG, ab_mag_to_njy, rho_grid, seeing_to_sigma_pixels, sky_flux_per_pixel
+from .utils import (
+    LSST_R_SKY_MAG,
+    MOFFAT_BETA,
+    ab_mag_to_njy,
+    rho_grid,
+    seeing_to_moffat_alpha_pixels,
+    sky_flux_per_pixel,
+)
 
 
-def make_nucleus_psf(shape, center, flux, sigma):
-    """Generate a Gaussian PSF representing the bare nucleus, normalized to `flux`."""
+def make_nucleus_psf(shape, center, flux, alpha, beta=MOFFAT_BETA):
+    """Generate a Moffat PSF representing the bare nucleus, normalized to `flux`."""
     rho = rho_grid(shape, center)
-    psf = np.exp(-rho ** 2 / (2 * sigma ** 2))
+    psf = (1 + (rho / alpha) ** 2) ** (-beta)
     return flux * psf / psf.sum()
 
 
@@ -36,7 +43,7 @@ def make_model_comet(
     shape=(101, 101),
     mag=20.0,
     nucleus_fraction=0.05,
-    sigma=seeing_to_sigma_pixels(0.75),
+    alpha=seeing_to_moffat_alpha_pixels(0.75),
     coma_type="symmetric",
     sky_mag=LSST_R_SKY_MAG,
     seed=None,
@@ -63,7 +70,7 @@ def make_model_comet(
     coma_flux = total_flux - nucleus_flux
 
     center = (shape[0] // 2, shape[1] // 2)
-    nucleus = make_nucleus_psf(shape, center, nucleus_flux, sigma)
+    nucleus = make_nucleus_psf(shape, center, nucleus_flux, alpha)
     coma = make_coma_profile(shape, center, coma_flux, coma_type=coma_type, **coma_kwargs)
     image = nucleus + coma
 

@@ -12,14 +12,21 @@ def rho_grid(shape, center):
     return np.sqrt((x - center[1]) ** 2 + (y - center[0]) ** 2)
 
 
-def fwhm_to_sigma(fwhm):
-    """Convert a Gaussian FWHM to sigma (same units in and out)."""
-    return fwhm / (2 * np.sqrt(2 * np.log(2)))
+# Moffat beta, fit to the real PSFIMAGE stamps in data/example_alerts/
+# (see notebooks/real_comet_alert_investigation.ipynb) -- real LSST PSFs
+# have heavier wings than a Gaussian, so this is the shape used for all
+# fake PSFs (nucleus injection and psfFlux measurement template alike).
+MOFFAT_BETA = 3.3
 
 
-def seeing_to_sigma_pixels(fwhm_arcsec, pixel_scale=LSST_PIXEL_SCALE):
-    """Convert seeing (FWHM, arcsec) to a Gaussian sigma in pixels."""
-    return fwhm_to_sigma(fwhm_arcsec / pixel_scale)
+def fwhm_to_moffat_alpha(fwhm, beta=MOFFAT_BETA):
+    """Convert a Moffat FWHM to alpha (same units in and out)."""
+    return fwhm / (2 * np.sqrt(2 ** (1 / beta) - 1))
+
+
+def seeing_to_moffat_alpha_pixels(fwhm_arcsec, beta=MOFFAT_BETA, pixel_scale=LSST_PIXEL_SCALE):
+    """Convert seeing (FWHM, arcsec) to a Moffat alpha in pixels."""
+    return fwhm_to_moffat_alpha(fwhm_arcsec / pixel_scale, beta)
 
 
 def ab_mag_to_njy(mag):

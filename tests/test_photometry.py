@@ -8,15 +8,15 @@ from lsst_aot.photometry import (
     psf_flux_fraction,
     psf_photometry,
 )
-from lsst_aot.utils import ab_mag_to_njy, seeing_to_sigma_pixels
+from lsst_aot.utils import ab_mag_to_njy, seeing_to_moffat_alpha_pixels
 
 
 def test_psf_photometry_recovers_point_source_flux():
     shape = (51, 51)
     center = (25, 25)
-    sigma = seeing_to_sigma_pixels(0.75)
-    image = make_nucleus_psf(shape, center, flux=500.0, sigma=sigma)
-    assert psf_photometry(image, center, sigma=sigma) == pytest.approx(500.0)
+    alpha = seeing_to_moffat_alpha_pixels(0.75)
+    image = make_nucleus_psf(shape, center, flux=500.0, alpha=alpha)
+    assert psf_photometry(image, center, alpha=alpha) == pytest.approx(500.0)
 
 
 def test_psf_photometry_underestimates_extended_source():
