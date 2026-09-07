@@ -10,6 +10,7 @@
 # Data files
 # data/
 output/
+data/obs_sbn_X05_full.csv
 
 # Output files
 *.png
